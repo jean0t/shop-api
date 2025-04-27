@@ -1,17 +1,16 @@
-# test
+# SHOP API
 
-A brief description of what the project does.  
-TODO: Project description  
+This project is an API made to manage Stores, in this case you can add Items to a certain store and request the info later. It was made as an exercise to practice Docker and Flask to create a complete REST API.
 
 ## Installation
 
-Instructions to install or build.  
-TODO: Make the installation Guide  
+1. Build the docker image `docker build -t shop-api`
+2. Run the image and access within your localhost `docker run -p 5000:5000 shop-api`
 
 ## Usage
 
-Examples of how to run the project.  
-TODO: Make the examples  
+You can go to `localhost:5000/swagger-ui` to see the paths accepted and the methods used.  
+The documentation also included the objects returned and accepted.  
 
 ## License
 
