@@ -4,7 +4,7 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 
 from db import items, stores
-from config import NOT_FOUND, CREATED, BAD_REQUEST
+from config import NOT_FOUND, CREATED, BAD_REQUEST, OK
 from schemas import ItemSchema, ItemUpdateSchema
 
 item_blp = Blueprint("Items", __name__, description="Operations on Items")
@@ -12,6 +12,7 @@ item_blp = Blueprint("Items", __name__, description="Operations on Items")
 
 @item_blp.route("/item/<string:item_id>")
 class Item(MethodView):
+    @item_blp.response(OK, ItemSchema)
     def get(self, item_id):
         item = items.get(item_id, False)
         if item:
@@ -27,6 +28,7 @@ class Item(MethodView):
             abort(NOT_FOUND, message="Item not Found")
 
     @item_blp.arguments(ItemUpdateSchema)
+    @item_blp.response(OK, ItemSchema)
     def put(self, item_data, item_id):
         if "price" not in item_data or "name" not in item_data:
             abort(
@@ -46,16 +48,22 @@ class Item(MethodView):
 
 @item_blp.route("/item")
 class ItemList(MethodView):
+    @item_blp.response(OK, ItemSchema(many=True))
     def get(self):
-        return {"items": list(items.values())}
+        return items.values()
 
     @item_blp.arguments(ItemSchema)
+    @item_blp.response(CREATED, ItemSchema)
     def post(self, item_data):
-        if item_data.get("store_id", None) not in stores:
-            abort(NOT_FOUND, message="Store not found")
+        for item in items.values():
+            if (
+                item_data["name"] == item["name"]
+                and item_data["store_id"] == item["store_id"]
+            ):
+                abort(BAD_REQUEST, message="Item already exists.")
 
         item_id = uuid.uuid4().hex
         item = {**item_data, "id": item_id}
         items[item_id] = item
 
-        return item, CREATED
+        return item
